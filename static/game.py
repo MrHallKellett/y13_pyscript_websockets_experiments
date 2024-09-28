@@ -11,12 +11,14 @@ question_log = []
 solved = []
 container = pydom["#container"][0]
 
+###############################################
+
 @when("keypress", "body")
 def handle_keypress(key):
     global answer
     print(f"{key.code} was pressed.")
     code = key.code
-    if "Enter" in code:
+    if "Enter" in code: # handles both enters on keyboard
         check_answers()
         answer = ""
     else:
@@ -25,6 +27,8 @@ def handle_keypress(key):
             answer += num
         else:
             print("invalid digit")
+
+###############################################
 
 def check_answers():
     for q in question_log:
@@ -40,6 +44,7 @@ def check_answers():
         except ValueError:
             pass
 
+###############################################
 
 def add_question_to_page(question):
     x, y, fs = randint(1, 1000), randint(1, 1000), randint(8, 72)
@@ -51,6 +56,7 @@ def add_question_to_page(question):
     this_question.html = question
     question_log.append(this_question)
 
+###############################################
 
 async def display_questions():
 
@@ -61,19 +67,17 @@ async def display_questions():
     )
 
     questions = await result.json()
-    console.log("loaded questions")
-    
-    
+    print("loaded questions")
 
     for question in loads(questions):
-        console.log(f"found question {question}")
+        print(f"found question {question}")
         add_question_to_page(question)
+      
+###############################################
         
-        
-
 def fetch_data():
     asyncio.ensure_future(display_questions())
 
-
+###############################################
 
 fetch_data()

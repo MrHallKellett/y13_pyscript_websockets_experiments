@@ -1,18 +1,18 @@
-import os
-
 from flask import Flask, jsonify, render_template, session
 from flask_cors import CORS
-from helpers import source_questions
+from os import environ
 from uuid import uuid4
 from json import dumps
+
+from helpers import source_questions
+
+####################################
 
 def create_app(config=None):
     app = Flask(__name__)
     app.config.update(dict(DEBUG=True))
     app.secret_key = uuid4().hex
     CORS(app)
-
-    
 
     @app.route("/")
     def main():
@@ -26,8 +26,9 @@ def create_app(config=None):
 
     return app
 
+####################################
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
+    port = int(environ.get("PORT", 8000))
     app = create_app()
     app.run(host="0.0.0.0", port=port)
