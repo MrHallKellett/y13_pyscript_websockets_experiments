@@ -6,10 +6,17 @@ from json import loads
 from pyweb import pydom
 from random import randint
 
+
 answer = ""
 question_log = []
 solved = []
 container = pydom["#container"][0]
+positions = []
+
+print("Here are the questions...")
+print(server_generated_questions)
+print("Here is the colour")
+print(colour)
 
 ###############################################
 
@@ -18,13 +25,17 @@ def handle_keypress(key):
     global answer
     print(f"{key.code} was pressed.")
     code = key.code
+    negative = False
     if "Enter" in code: # handles both enters on keyboard
         check_answers()
         answer = ""
+    elif "Minus" in code or "Subtract" in code:
+        if "-" not in answer:
+            answer = "-" + answer
     else:
-        num = code[-1]
-        if num.isdigit():
-            answer += num
+        char = code[-1]
+        if char.isdigit():
+            answer += char           
         else:
             print("invalid digit")
 
@@ -47,13 +58,18 @@ def check_answers():
 ###############################################
 
 def add_question_to_page(question):
+    # modify this subroutine so questions do not
+    # ever overlap
     x, y, fs = randint(1, 1000), randint(1, 1000), randint(8, 72)
     this_question = container.create("span")
+
+    this_question.style["color"] = colour
     this_question.style["position"] = f"fixed"
     this_question.style["left"] = f"{x}px"
     this_question.style["top"] = f"{y}px"
     this_question.style["font-size"] = f"{fs}px"        
     this_question.html = question
+   
     question_log.append(this_question)
 
 ###############################################
@@ -68,8 +84,10 @@ async def display_questions():
 
     questions = await result.json()
     print("loaded questions")
+    
+    print("loaded colour", colour)
 
-    for question in loads(questions):
+    for question in server_generated_questions:
         print(f"found question {question}")
         add_question_to_page(question)
       
