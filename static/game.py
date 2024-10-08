@@ -2,7 +2,7 @@ import asyncio
 from js import console
 from pyscript import document, when
 from pyodide.http import pyfetch
-from json import loads
+from json import loads, dumps
 from pyweb import pydom
 from random import randint
 
@@ -12,11 +12,8 @@ question_log = []
 solved = []
 container = pydom["#container"][0]
 positions = []
+colour = None
 
-print("Here are the questions...")
-print(server_generated_questions)
-print("Here is the colour")
-print(colour)
 
 ###############################################
 
@@ -27,7 +24,7 @@ def handle_keypress(key):
     code = key.code
     negative = False
     if "Enter" in code: # handles both enters on keyboard
-        check_answers()
+        asyncio.ensure_future(check_answer_new(answer))
         answer = ""
     elif "Minus" in code or "Subtract" in code:
         if "-" not in answer:
@@ -55,15 +52,25 @@ def check_answers():
         except ValueError:
             pass
 
+def display_user():
+    user = container.create("span")
+    user.style["color"] = colour
+    user.style["left"] = "300px"
+    user.style["top"] = "50px"
+    user.style["font-size"] = "72px"
+    user.html = "You are logged in."
+
+
+
 ###############################################
 
-def add_question_to_page(question):
+def add_question_to_page(question_num, question):
     # modify this subroutine so questions do not
     # ever overlap
     x, y, fs = randint(1, 1000), randint(1, 1000), randint(8, 72)
-    this_question = container.create("span")
-
-    this_question.style["color"] = colour
+    this_question = container.create("span", classes=[f"q{question_num}"])
+    
+    
     this_question.style["position"] = f"fixed"
     this_question.style["left"] = f"{x}px"
     this_question.style["top"] = f"{y}px"
@@ -73,23 +80,51 @@ def add_question_to_page(question):
     question_log.append(this_question)
 
 ###############################################
+    
+
+async def check_answer_new(answer):
+
+
+    print(f"Using pyfetch to send {answer} to server")
+    result = await pyfetch(
+        url="/check_answer",
+        method="POST",
+        headers={"Content-Type": "application/json"},
+        body = dumps(answer)
+    )
+    
+    data = await result.json()
+
+    print("Received a result", data)
+    
 
 async def display_questions():
-
+    global colour
     result = await pyfetch(
-        url="/get_new_questions",
+        url="/start_game",
         method="GET",
         headers={"Content-Type": "application/json; charset=UTF-8"}
     )
 
-    questions = await result.json()
+    data = await result.json()
     print("loaded questions")
-    
-    print("loaded colour", colour)
 
-    for question in server_generated_questions:
+    server_generated_questions = loads(data['questions'])
+
+    
+    colour = data['colour']
+    
+    print("Here are the questions...")
+    print(server_generated_questions)
+    print("Here is the colour")
+    print(colour)
+
+
+    display_user()
+
+    for index, question in enumerate(server_generated_questions):
         print(f"found question {question}")
-        add_question_to_page(question)
+        add_question_to_page(index, question)
       
 ###############################################
         
