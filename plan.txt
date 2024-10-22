@@ -26,6 +26,9 @@ User joins game
             user lists displayed on screen
             user list updated when new game joined
 
+"Refactor later" list
+
+    Use Jinja2 template inheritance e.g. message flashing
 
 ###########################################
 

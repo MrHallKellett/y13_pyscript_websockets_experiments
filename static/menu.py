@@ -3,7 +3,9 @@ from pyodide.ffi import create_proxy
 from js import WebSocket, console, document, location
 from json import dumps, loads
 
+
 feedback = document.getElementById("feedback")
+
 available_games = document.getElementById("available_games")
 
 
@@ -20,7 +22,7 @@ def create_game(event):
     
     username = document.getElementById("username").value
     if username == "":
-        show_error("Enter username first.")
+        show_msg("Enter username first.")
         return
     
     name = document.getElementById("name").value

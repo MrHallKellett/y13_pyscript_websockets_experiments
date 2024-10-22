@@ -39,3 +39,6 @@ class Game:
         
     def get_id(self):
         return self.__id
+    
+    def get_secs_til_start(self):
+        return (datetime.now() - self.__created).seconds

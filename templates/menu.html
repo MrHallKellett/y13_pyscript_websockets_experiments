@@ -53,7 +53,20 @@
         </div>
 
         
-        <div id="feedback" style="color:red;"></div>
+        <div id="feedback" style="color:red;">
+        
+        <ul id="flashes">
+            {% with messages = get_flashed_messages() %}           
+                    
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}               
+                
+            {% endwith %}
+        </ul>
+        
+        
+        </div>
 
 
 
