@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Math Quiz - Game</title>
+    <title>Math Quiz - Menu</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="https://pyscript.net/releases/2022.12.1/pyscript.css" />
     
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.3/core.css">
       <script type="module" src="https://pyscript.net/releases/2024.1.3/core.js"></script>
 
-        
+    
     
 
 
@@ -16,16 +16,17 @@
 <body>
     <main>
         <h1>Math Quiz</h1>
-        
 
+        <label for="set_username">Set username:
+            <input name="set_username" id="set_username" type="text"/>    
+        </label>
         <div id="container" style="width:1000px; height:1000px"></div>
 
-        {{ questions }}
+    <py-script src="static/menu.py"></py-script>
+    
 
 
-<py-script src="static/game.py">
 
-</py-script>
 
 
 </main>

@@ -1,7 +1,7 @@
 Maths Quiz Game
 
 User connects to app.
-User can set username.
+User can set username. X
 User shown list of currently running games.
 User given option to create game.
     Create game screen:

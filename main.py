@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, session, request
+from flask import Flask, jsonify, render_template, session, request, Response
 from flask_cors import CORS
 from os import environ
 from uuid import uuid4
@@ -25,13 +25,17 @@ def create_app(config=None):
     CORS(app)
 
 
+    # @app.route("/")
+    # def main():
+    #     session['difficulty'] = 10
+    #     colour_index = randrange(0, len(colours))
+    #     session['colour'] = colours.pop(colour_index)
+    #     print("You were assigned", session['colour'])
+    #     return render_template("quiz.html")
+
     @app.route("/")
-    def main():
-        session['difficulty'] = 10
-        colour_index = randrange(0, len(colours))
-        session['colour'] = colours.pop(colour_index)
-        print("You were assigned", session['colour'])
-        return render_template("quiz.html")
+    def menu():
+        return render_template("menu.html")
 
     @app.route("/start_game")
     def get_questions():
@@ -40,16 +44,22 @@ def create_app(config=None):
                 "colour":session['colour']}
         return dumps(data)
     
-    @app.route("/check_answer", methods=["POST"])
-    def check_answer():
-        print("Checking an answer...")
-        answer = request.json
+    @app.route("/set_username/<username>", methods=["GET"])
+    def set_username(username):
+        session['username'] = username
+        print("new username is", username)
+        return Response(status=200)
+    
+    # @app.route("/check_answer", methods=["POST"])
+    # def check_answer():
+    #     print("Checking an answer...")
+    #     answer = request.json
 
-        for idx, q in enumerate(questions):
-            if eval(q) == int(answer):
-                solved.append(idx)
+    #     for idx, q in enumerate(questions):
+    #         if eval(q) == int(answer):
+    #             solved.append(idx)
 
-        return Response({
+    #     return Response({
 
     @sock.route('/echo')
     def echo(ws):
