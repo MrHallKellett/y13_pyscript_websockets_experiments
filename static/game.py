@@ -7,6 +7,13 @@ from json import dumps, loads
 
 countdown = document.getElementById("countdown")
 
+def update_game_menu():
+    # fix later - OOP approach, abstract base class or smth
+    raise NotImplementedError
+
+
+
+
 def check_secs_til_game_start():
     ws.send(dumps({"message":game_id, "mode":5}))
     

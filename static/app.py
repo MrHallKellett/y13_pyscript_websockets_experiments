@@ -9,7 +9,7 @@ feedback = document.getElementById("feedback")
 available_games = document.getElementById("available_games")
 
 # Replace with your WebSocket server URL
-WEBSOCKET_URL = 'ws://' + location.host + "/send"
+WEBSOCKET_URL = 'ws://' + location.host + "/" + mode
 ws = WebSocket.new(WEBSOCKET_URL)
 
 

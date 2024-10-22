@@ -28,7 +28,9 @@ User joins game
 
 "Refactor later" list
 
+    full OOP - public, private, protected etc.
     Use Jinja2 template inheritance e.g. message flashing
+    config.py constants etc.
 
 ###########################################
 

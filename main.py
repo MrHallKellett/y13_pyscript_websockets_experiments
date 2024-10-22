@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, render_template, session, request, Response, redirect, flash
+from flask import Flask, jsonify, render_template, \
+    session, request, Response, redirect, flash, url_for
 from flask_cors import CORS
 from os import environ
 from uuid import uuid4
@@ -38,10 +39,23 @@ class MathQuizGame:
 
     def register_routes(self):
         self.__app.add_url_rule('/', '__menu', self.__menu)
-        self.__app.add_url_rule('/game/<game_id>', '__game', self.__game)
+        self.__app.add_url_rule('/game', '__game', self.__game)
 
-        @self.__sock.route('/send')
-        def echo(ws):
+        @self.__sock.route('/game')
+        def game_echo(ws):
+            current_game = self.__get_current_game()
+            ws.send(dumps({"mode":6, "data":current_game.get_questions()}))    # send questions
+
+            while True:
+                data = loads(ws.receive())
+                print(data)
+                mode = data["mode"]
+                msg  = data["message"]
+                if mode == 5:     # check num secs until game start                                        
+                    response = current_game.get_secs_til_start()
+
+        @self.__sock.route('/menu')
+        def menu_echo(ws):            
             ws.send(dumps({"mode":1, "data":self._get_game_list()}))    # send initial game list
             while True:            
                 data = loads(ws.receive())
@@ -57,10 +71,7 @@ class MathQuizGame:
                     response = self._join_game(msg)
                 elif mode == 3:     # new answer
                     response = self._check_answer(msg)
-                elif mode == 5:     # check num secs until game start
-                    game_id = msg["game_id"]
-                    current_game = self.__get_game_by_id()
-                    response = current_game.get_secs_til_start()
+                
                                
                 ws.send(dumps({"mode":mode, "data":response}))
     
@@ -72,7 +83,7 @@ class MathQuizGame:
         game_id = session.get("current_game")
         if game_id is None:
             flash("No game was selected.")
-            return redirect(f"game/{game_id}")
+            return redirect(url_for("__menu"))
         else:
             return render_template("game.html", game_id=game_id)    
     
@@ -102,6 +113,9 @@ class MathQuizGame:
         
     def _get_game_by_id(self, game_id):
         return self.__curent_games[game_id]
+
+    def _get_current_game(self):
+        return self._get_game_by_id(session["current_game"])
 
     def run(self, host="0.0.0.0", port=8000):
         self.__app.run(host=host, port=port)
