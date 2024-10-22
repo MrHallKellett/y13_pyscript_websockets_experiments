@@ -18,14 +18,19 @@
         <h1>Math Quiz</h1>
         
 
-        <div id="container" style="width:1000px; height:1000px"></div>
+        <div id="countdown" style="width:500px; height:500px"></div>
 
-        {{ questions }}
+        <div id="container" style="display:none; width:1000px; height:1000px"></div>
+
+        
+        <div id="feedback" style="color:red;"></div>
 
 
-<py-script src="static/game.py">
 
-</py-script>
+
+    <py-script src="static/game.py"></py-script>
+    <py-script src="static/app.py"></py-script>
+    
 
 
 </main>

@@ -78,7 +78,7 @@ class MathQuizGame:
     
     def _join_game(self, game_id):
         session['current_game'] = game_id
-        return f"You will be joining game {game_id}."
+        return {"message":f"You will be joining game {game_id}."}
     
     def _create_new_game(self, game_data):
         user = session['username']

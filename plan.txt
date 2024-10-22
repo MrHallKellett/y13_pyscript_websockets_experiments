@@ -24,6 +24,7 @@ User joins game
         No:
             countdown displayed on screen
             user lists displayed on screen
+            user list updated when new game joined
 
 
 ###########################################
