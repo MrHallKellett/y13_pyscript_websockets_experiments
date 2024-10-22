@@ -1,8 +1,9 @@
 from asyncio import ensure_future
 
 from pyodide.ffi import create_proxy
-from js import WebSocket, console, document, location
+from js import WebSocket, console, document, location, localStorage
 from json import dumps, loads
+from uuid import uuid4
 
 feedback = document.getElementById("feedback")
 
@@ -11,6 +12,8 @@ available_games = document.getElementById("available_games")
 # Replace with your WebSocket server URL
 WEBSOCKET_URL = 'ws://' + location.host + "/" + mode
 ws = WebSocket.new(WEBSOCKET_URL)
+
+token = None
 
 
 def process_message(event):
@@ -37,6 +40,21 @@ def show_msg(msg):
     new_msg.innerHTML = msg
     flashes.appendChild(new_msg)
 
+def handshake(event):
+    global token
+    print("WebSocket connection established!")
+    
+
+    # handshake
+    token = localStorage.getItem("token")
+    if token is None:
+        token = uuid4().int
+        localStorage.setItem("token", token)
+
+    ws.send(dumps({"message":"hello", "mode":9, "token":token}))
+
 
 message_proxy = create_proxy(process_message)
 ws.addEventListener("message", message_proxy)
+ws.on_open = handshake
+

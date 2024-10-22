@@ -1,21 +1,23 @@
 from asyncio import ensure_future
 from pyodide.ffi import create_proxy
-from js import WebSocket, console, document, location
+from js import WebSocket, console, document, location, localStorage
 from json import dumps, loads
-
+from uuid import uuid4
 
 feedback = document.getElementById("feedback")
 
 available_games = document.getElementById("available_games")
 
 
+
+
 def set_username(event):
     username = event.target.value
-    ws.send(dumps({"message":username, "mode":0}))
+    ws.send(dumps({"message":username, "mode":0, "token":token}))
 
 def set_game(event):
     game_id = available_games.selectedOptions[0].id    
-    ws.send(dumps({"message":game_id, "mode":2}))
+    ws.send(dumps({"message":game_id, "mode":2, "token":token}))
 
 def create_game(event):
     print("running submit proxy")
@@ -35,7 +37,8 @@ def create_game(event):
                               "num_questions":num_questions,
                               "delay":delay
                              },
-                    "mode":1}
+                    "mode":1,
+                    "token":token}
             ))
     
 
@@ -69,4 +72,7 @@ game_select_dd.addEventListener("change", change_game_proxy)
 create_game_btn = document.getElementById("create_game")
 submit_proxy = create_proxy(create_game)
 create_game_btn.addEventListener("click", submit_proxy)
+
+
+
 

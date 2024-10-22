@@ -11,6 +11,7 @@
 
     <py-script>
 mode = "menu"
+
     </py-script>
     
 
@@ -31,7 +32,7 @@ mode = "menu"
                     <select name="available_games" id="available_games"></select>
                 </label>
 
-                <a href="/game"><button id="join">Join</button></a>
+                <a href="/game/{{token}}"><button id="join">Join</button></a>
             </div>
 
             <div class="column">
@@ -79,6 +80,7 @@ mode = "menu"
 
     <py-script src="static/menu.py"></py-script>
     <py-script src="static/app.py"></py-script>
+    
     
 
 

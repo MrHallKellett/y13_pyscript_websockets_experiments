@@ -15,7 +15,7 @@ def update_game_menu():
 
 
 def check_secs_til_game_start():
-    ws.send(dumps({"message":game_id, "mode":5}))
+    ws.send(dumps({"message":game_id, "mode":5, "token":token}))
     
 def update_countdown_timer(secs):    
     countdown.innerHTML = secs
