@@ -44,7 +44,7 @@ class MathQuizGame:
         @self.__sock.route('/game')
         def game_echo(ws):
             current_game = self.__get_current_game()
-            ws.send(dumps({"mode":6, "data":current_game.get_questions()}))    # send questions
+            ws.send(dumps({"mode":6, "data":current_game.get_question_display()}))    # send questions
 
             while True:
                 data = loads(ws.receive())
@@ -52,7 +52,9 @@ class MathQuizGame:
                 mode = data["mode"]
                 msg  = data["message"]
                 if mode == 5:     # check num secs until game start                                        
-                    response = current_game.get_secs_til_start()
+                    response = {"message":current_game.get_secs_til_start()}
+
+                ws.send(dumps({"mode":mode, "data":response}))
 
         @self.__sock.route('/menu')
         def menu_echo(ws):            
@@ -112,9 +114,9 @@ class MathQuizGame:
         return {"games":games, "message":"List of available games updated"}                    
         
     def _get_game_by_id(self, game_id):
-        return self.__curent_games[game_id]
+        return self.__current_games[game_id]
 
-    def _get_current_game(self):
+    def __get_current_game(self):
         return self._get_game_by_id(session["current_game"])
 
     def run(self, host="0.0.0.0", port=8000):

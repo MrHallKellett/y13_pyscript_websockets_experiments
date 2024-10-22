@@ -28,6 +28,7 @@ def process_message(event):
     elif mode == 2:
         show_msg(data["message"])
     elif mode == 5:
+        print("updating countdown")
         update_countdown_timer(data["message"])
 
 def show_msg(msg):

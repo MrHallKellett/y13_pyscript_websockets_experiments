@@ -2,13 +2,13 @@ from typing import List, Dict
 from markupsafe import Markup
 from uuid import uuid4
 from datetime import datetime
-from random import randint, choice
+from random import randint, choice, randrange
 from typing import List
 from json import dumps
 from config import *
     
 class Question:
-    def __init__(self, text: str, correct_answer: int):
+    def __init__(self):
         self.__text = f"{randint(1, 10)} {choice(OPERATORS)} {randint(1, 10)}"
         self.__correct_answer = eval(self.__text)
         self.__answered_by = None  # int, id_ of first player to answer
@@ -19,9 +19,14 @@ class Question:
             self.__answered_by = guesser.get_id()
             self.__colour = guesser.get_colour()
 
-
     def get_display(self):
-        return Markup(f'<span style="color: {self.__colour}">self.__text)
+        answer = ""
+        if self.__answered_by:
+            answer = f" = {self.__correct_answer}"
+        return f'<span style="color: {self.__colour}">{self.__text}{answer}</span>'
+
+    def been_answered(self):
+        return not self.__answered_by is None
 
 class Player:
     def __init__(self, name: str, colour: str, colours: list):
@@ -35,7 +40,7 @@ class Game:
     def __init__(self, name: str, max_players: int, delay: int, num_questions: int,
                  owner: str):
         self.__available_colours = list(COLOURS)
-        self.__questions: List[Question] = []
+        self.__questions: List[Question] = [Question() for _ in range(num_questions)]
         self.__delay = delay  # num of seconds before game begins
         self.__name = name
         self.__max_players = max_players
@@ -49,7 +54,10 @@ class Game:
         pass
 
     def _check_answer(self, guess: int, player_id: int):
-        pass
+        guesser = self.__players[player_id]
+        for question in self.__questions:
+            if not question.been_answered():
+                question.check_answer(guess, guesser)
 
     def get_menu_display(self):
         return f"{self.__name.upper()} by {self.__owner}"

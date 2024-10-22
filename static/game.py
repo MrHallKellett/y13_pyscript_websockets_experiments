@@ -17,8 +17,11 @@ def update_game_menu():
 def check_secs_til_game_start():
     ws.send(dumps({"message":game_id, "mode":5}))
     
-def update_countdown_timer(secs):
+def update_countdown_timer(secs):    
     countdown.innerHTML = secs
 
 
-setInterval(check_secs_til_game_start, 1000)
+
+interval_proxy = create_proxy(check_secs_til_game_start)
+setInterval(interval_proxy, 1000)
+
