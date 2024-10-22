@@ -6,7 +6,8 @@ from random import randint, choice, randrange
 from typing import List
 from json import dumps
 from config import *
-    
+from collections import OrderedDict
+
 class Question:
     def __init__(self):
         self.__text = f"{randint(1, 10)} {choice(OPERATORS)} {randint(1, 10)}"
@@ -29,12 +30,15 @@ class Question:
         return not self.__answered_by is None
 
 class Player:
-    def __init__(self, name: str, colour: str, colours: list):
+    def __init__(self, player_id: int, name: str, colours: list):
         self.__name = name
-        self.__id_ = uuid4().int
+        self.__id_ = player_id
         rand_index = randrange(0, len(colours))
         chosen_colour = colours.pop(rand_index)
         self.__colour = chosen_colour
+
+    def get_join_message(self):
+        return '<li style="color:{self.__colour}">{username} joined the server.</li>"'
 
 class Game:
     def __init__(self, name: str, max_players: int, delay: int, num_questions: int,
@@ -44,7 +48,7 @@ class Game:
         self.__delay = delay  # num of seconds before game begins
         self.__name = name
         self.__max_players = max_players
-        self.__players: Dict[int, Player] = {}
+        self.__players: Dict[int, Player] = OrderedDict()
         self.__num_questions = num_questions
         self.__owner = owner
         self.__created = datetime.now()
@@ -66,7 +70,18 @@ class Game:
         return self.__id
     
     def get_secs_til_start(self):
-        return (datetime.now() - self.__created).seconds
+        secs_left = self.__delay - (datetime.now() - self.__created).seconds
+        if secs_left > 0:
+            return secs_left
+        else:
+            return "GO!"
     
     def get_question_display(self):
         return [question.get_display() for question in self.__questions]
+
+    def add_player(self, username):
+        player_id = uuid4().int
+        self.__players[player_id] = Player(player_id, username, self.__available_colours)
+
+    def get_newest_player(self):
+        return self.__players[-1]

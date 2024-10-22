@@ -1,11 +1,13 @@
 from flask import Flask, jsonify, render_template, \
-    session, request, Response, redirect, flash, url_for
+    request, Response, redirect, flash, url_for, session
 from flask_cors import CORS
 from os import environ
 from uuid import uuid4
 from json import dumps, loads
 ##############################
 from flask_sock import Sock
+from cachelib.file import FileSystemCache
+from flask_session import Session
 ##############################
 from helpers import source_questions
 from random import randrange
@@ -18,20 +20,27 @@ questions = dumps(source_questions(10))
 
 GAME_DUMMY = Game("a dummy game", 10, 30, 10, "admin")
 
+sess = Session()
 
 class MathQuizGame:
 
     def __init__(self):
         # Flask and WebSocket stuff
         app = Flask(__name__)    
+        
         sock = Sock(app)
         sock.init_app(app)    
         app.config.update(dict(DEBUG=True))
-        app.secret_key = uuid4().hex
+        app.config['SESSION_TYPE'] = 'cachelib'
+        app.config['SESSION_CACHELIB'] = FileSystemCache(cache_dir='flask_session', threshold=500)
+        app.config['SECRET_KEY'] = uuid4().hex
         CORS(app)
+        sess.init_app(app)
         self.__app = app
         self.__sock = sock       
+        
         self.register_routes()
+        
 
         self.__current_games = {GAME_DUMMY.get_id():GAME_DUMMY}
         
@@ -51,6 +60,10 @@ class MathQuizGame:
                 print(data)
                 mode = data["mode"]
                 msg  = data["message"]
+                if mode == 4:     # new player joined server
+                    current_game.add_player(session['username'])
+                    new_player = current_game.get_newest_player()
+                    response = {"message":new_player.get_join_message()}
                 if mode == 5:     # check num secs until game start                                        
                     response = {"message":current_game.get_secs_til_start()}
 
@@ -69,8 +82,8 @@ class MathQuizGame:
                 elif mode == 1:     # new game
                     self._create_new_game(msg)
                     response = self._get_game_list()
-                elif mode == 2:     # join game
-                    response = self._join_game(msg)
+                elif mode == 2:     # set game to join
+                    response = self._set_game_to_join(msg)
                 elif mode == 3:     # new answer
                     response = self._check_answer(msg)
                 
@@ -78,32 +91,42 @@ class MathQuizGame:
                 ws.send(dumps({"mode":mode, "data":response}))
     
     def __menu(self):
-        session['current_game'] = GAME_DUMMY.get_id()
+        # session['current_game'] = GAME_DUMMY.get_id()
+        # session['username'] = 'test'
         return render_template("menu.html")
 
     def __game(self):
         game_id = session.get("current_game")
+        username = session.get("username")
+        print("current game", game_id, "current username", username)
         if game_id is None:
             flash("No game was selected.")
             return redirect(url_for("__menu"))
-        else:
+        elif username is None:
+            flash("No username was entered.")
+            return redirect(url_for("__menu"))
+        else:            
+            self.__get_current_game().add_player(username)
             return render_template("game.html", game_id=game_id)    
     
     def _set_username(self, username):
         session['username'] = username
         print("new username is", username)
-        return f"Your username has been set to {username}."
+        game_id = session.get('current_game')
+        return f"Your username has been set to {username}. Currently playing game {game_id}"
     
-    def _join_game(self, game_id):
-        session['current_game'] = game_id
-        return {"message":f"You will be joining game {game_id}."}
+    def _set_game_to_join(self, game_id):
+        username = session['username']
+        session['current_game'] = game_id   
+
+        return {"message":f"You will be joining game {game_id}. Current user is {username}"}
     
     def _create_new_game(self, game_data):
         user = session['username']
         name = game_data["name"]
-        max_players = game_data["max_players"]
+        max_players = int(game_data["max_players"])
         delay = game_data["delay"]
-        num_questions = game_data["num_questions"]
+        num_questions = int(game_data["num_questions"])
         owner = user
         new_game = Game(name, max_players, delay, num_questions, owner)
         self.__current_games[new_game.get_id()] = new_game
