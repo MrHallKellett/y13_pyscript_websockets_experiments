@@ -4,12 +4,12 @@ User connects to app. X
 User can set username. X
 User shown list of currently running games. X
 Deal with websocket closing (reopen connection)
-User given option to create game.
+User given option to create game. X
     Create game screen:
-        set delay - how long before game starts?
-        set game name
-        set max players
-        go -- instantiates new Game object
+        set delay - how long before game starts? X
+        set game name X
+        set max players X
+        go -- instantiates new Game object X
 
 User joins game
     Game screen:

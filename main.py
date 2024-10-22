@@ -42,6 +42,7 @@ class MathQuizGame:
 
         @self.__sock.route('/send')
         def echo(ws):
+            ws.send(dumps({"mode":1, "data":self._get_game_list()}))    # send initial game list
             while True:            
                 data = loads(ws.receive())
                 print(data)
@@ -51,12 +52,14 @@ class MathQuizGame:
                     response = {"message":self._set_username(msg)}
                 elif mode == 1:     # new game
                     self._create_new_game(msg)
-                    response = {"games":self._get_game_list(), "message":"List of available games updated"}
-                    
+                    response = self._get_game_list()
                 elif mode == 2:     # join game
                     response = self._join_game(msg)
                 elif mode == 3:     # new answer
                     response = self._check_answer(msg)
+
+                
+                
                 ws.send(dumps({"mode":mode, "data":response}))
         
         
@@ -73,6 +76,10 @@ class MathQuizGame:
         print("new username is", username)
         return f"Your username has been set to {username}."
     
+    def _join_game(self, game_id):
+        session['current_game'] = game_id
+        return f"You will be joining game {game_id}."
+    
     def _create_new_game(self, game_data):
         user = session['username']
         name = game_data["name"]
@@ -85,7 +92,9 @@ class MathQuizGame:
         print("Created a new game based on", game_data)
 
     def _get_game_list(self):
-        return [game.get_menu_display() for game in self.__current_games]
+        games = {game.get_id():game.get_menu_display() for game in self.__current_games}
+        return {"games":games, "message":"List of available games updated"}                    
+        
 
     def run(self, host="0.0.0.0", port=8000):
         self.__app.run(host=host, port=port)

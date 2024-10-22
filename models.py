@@ -12,7 +12,7 @@ class Question:
 class Player:
     def __init__(self, name: str, colour: str):
         self.__name = name
-        self.__id_ = uuid4()
+        self.__id_ = uuid4().int
         self.__colour = colour
 
 class Game:
@@ -26,6 +26,7 @@ class Game:
         self.__num_questions = num_questions
         self.__owner = owner
         self.__created = datetime.now()
+        self.__id = uuid4().int
 
     def _jsonify(self):               
         pass
@@ -36,3 +37,5 @@ class Game:
     def get_menu_display(self):
         return f"{self.__name.upper()} by {self.__owner}"
         
+    def get_id(self):
+        return self.__id

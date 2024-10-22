@@ -25,6 +25,10 @@ def set_username(event):
     username = event.target.value
     ws.send(dumps({"message":username, "mode":0}))
 
+def set_game(event):
+    username = event.target.id
+    ws.send(dumps({"message":username, "mode":2}))
+
 def create_game(event):
     print("running submit proxy")
     
@@ -52,10 +56,12 @@ def create_game(event):
 
 def update_game_menu(games):
     available_games.html = ""
-    for game in games:
+    for id_, game in games.items():
         this_game = available_games.create("option")
         this_game.value = game
         this_game.html = game
+        this_game.id = id_
+
 
 def process_message(event):
     data = loads(event.data)
@@ -76,8 +82,12 @@ def show_error(msg):
 
 
 username_field = document.getElementById("username")
-change_proxy = create_proxy(set_username)
-username_field.addEventListener("change", change_proxy)
+change_user_proxy = create_proxy(set_username)
+username_field.addEventListener("change", change_user_proxy)
+
+game_select_dd = document.getElementById("available_games")
+change_game_proxy = create_proxy(set_game)
+username_field.addEventListener("change", change_game_proxy)
 
 message_proxy = create_proxy(process_message)
 ws.addEventListener("message", message_proxy)
@@ -85,3 +95,5 @@ ws.addEventListener("message", message_proxy)
 create_game_btn = document.getElementById("create_game")
 submit_proxy = create_proxy(create_game)
 create_game_btn.addEventListener("click", submit_proxy)
+
+
