@@ -3,6 +3,7 @@
 <head>
     <title>Math Quiz - Menu</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="static/styles.css">
     <link rel="stylesheet" href="https://pyscript.net/releases/2022.12.1/pyscript.css" />
     
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.3/core.css">
@@ -17,11 +18,47 @@
     <main>
         <h1>Math Quiz</h1>
 
-        <label for="set_username">Set username:
-            <input name="set_username" id="set_username" type="text"/>    
-        </label>
-        <div id="container" style="width:1000px; height:500px"></div>
+        <div class="grid">
+
+            <div class="column">
+                <label for="username">Set username:
+                    <input name="username" id="username" type="text"/>    
+                </label>
+                <br>
+                <label for="available_games">Join existing game:
+                    <select name="available_games" id="available_games"></select>
+                </label>
+            </div>
+
+            <div class="column">
+                    Create a new game:
+    
+                        <label for="name">Name:</label>
+                        <input type="text" id="name" name="name" required>
+                        <br>
+
+                        <label for="max_players">Maximum Players:</label>
+                        <input type="number" id="max_players" name="max_players" min="2" required>
+                        <br>
+
+                        <label for="delay">Number of Seconds Before Game Starts:</label>
+                        <input type="number" id="delay" name="delay" min="0" required>
+                        <br>
+                        <label for="num_questions">Number of Questions:</label>
+                        <input type="number" id="num_questions" name="num_questions" min="10" required>
+                        <br>
+                        <button id="create_game">Create Game</button>
+                    </label>
+        
+            </div>
+        
+        </div>
+
+        
         <div id="feedback" style="color:red;"></div>
+
+
+
 
     <py-script src="static/menu.py"></py-script>
     

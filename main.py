@@ -10,75 +10,95 @@ from helpers import source_questions
 from random import randrange
 from markupsafe import Markup
 ####################################
+from models import Game, Player, Question
 
 colours = ["red", "blue", "orange", "pink", "yellow"]
 questions = dumps(source_questions(10))
 
-def create_app(config=None):
-    app = Flask(__name__)
-    ##############################
-    sock = Sock(app)
-    sock.init_app(app)
-    ##############################
-    app.config.update(dict(DEBUG=True))
-    app.secret_key = uuid4().hex
-    CORS(app)
+GAME_DUMMY = Game("a dummy game", 10, 30, 10, "admin")
 
 
-    # @app.route("/")
-    # def main():
-    #     session['difficulty'] = 10
-    #     colour_index = randrange(0, len(colours))
-    #     session['colour'] = colours.pop(colour_index)
-    #     print("You were assigned", session['colour'])
-    #     return render_template("quiz.html")
+class MathQuizGame:
 
-    @app.route("/")
-    def menu():
+    def __init__(self):
+        # Flask and WebSocket stuff
+        app = Flask(__name__)    
+        sock = Sock(app)
+        sock.init_app(app)    
+        app.config.update(dict(DEBUG=True))
+        app.secret_key = uuid4().hex
+        CORS(app)
+        self.__app = app
+        self.__sock = sock       
+        self.register_routes()
+
+        self.__current_games = [GAME_DUMMY]
+
+    
+
+    def register_routes(self):
+        self.__app.add_url_rule('/', '__menu', self.__menu)
+        self.__app.add_url_rule('/game', '__game', self.__game)
+
+        @self.__sock.route('/send')
+        def echo(ws):
+            while True:            
+                data = loads(ws.receive())
+                print(data)
+                mode = data["mode"]
+                msg  = data["message"]
+                if mode == 0:       # new username
+                    response = {"message":self._set_username(msg)}
+                elif mode == 1:     # new game
+                    self._create_new_game(msg)
+                    response = {"games":self._get_game_list(), "message":"List of available games updated"}
+                    
+                elif mode == 2:     # join game
+                    response = self._join_game(msg)
+                elif mode == 3:     # new answer
+                    response = self._check_answer(msg)
+                ws.send(dumps({"mode":mode, "data":response}))
+        
+        
+    
+    def __menu(self):
         return render_template("menu.html")
 
-    @app.route("/start_game")
-    def get_questions():
-        n = session['difficulty']
-        data = {"questions":source_questions(n),
-                "colour":session['colour']}
-        return dumps(data)
+    def __game(self):
+        return render_template("game.html")
     
     
-    def set_username(username):
+    def _set_username(self, username):
         session['username'] = username
         print("new username is", username)
         return f"Your username has been set to {username}."
-
-    @sock.route('/send')
-    def echo(ws):
-        while True:            
-            data = loads(ws.receive())
-            print(data)
-            mode = data["mode"]
-            msg  = data["message"]
-            if mode == 0:       # new username
-                response = set_username(msg)                
-            elif mode == 1:     # new game
-                response = create_new_game(msg)
-            elif mode == 2:     # join game
-                response = join_game(msg)
-            elif mode == 3:     # new answer
-                response = check_answer(msg)
-            ws.send(response)
-
-
-    @app.route("/socket_test")
-    def test_socket():
-        
-        return render_template("test_sockets.html")
     
+    def _create_new_game(self, game_data):
+        user = session['username']
+        name = game_data["name"]
+        max_players = game_data["max_players"]
+        delay = game_data["delay"]
+        num_questions = game_data["num_questions"]
+        owner = user
+        new_game = Game(name, max_players, delay, num_questions, owner)
+        self.__current_games.append(new_game)
+        print("Created a new game based on", game_data)
 
-    return app
+    def _get_game_list(self):
+        return [game.get_menu_display() for game in self.__current_games]
+
+    def run(self, host="0.0.0.0", port=8000):
+        self.__app.run(host=host, port=port)
+
+
 
 ####################################
 
 if __name__ == "__main__":
-    port = int(environ.get("PORT", 8000))
-    app = create_app()
-    app.run(host="0.0.0.0", port=port)
+
+    server = MathQuizGame()
+
+
+
+
+    server.run()
