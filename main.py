@@ -2,7 +2,7 @@ from flask import Flask, jsonify, render_template, session, request, Response
 from flask_cors import CORS
 from os import environ
 from uuid import uuid4
-from json import dumps
+from json import dumps, loads
 ##############################
 from flask_sock import Sock
 ##############################
@@ -44,29 +44,29 @@ def create_app(config=None):
                 "colour":session['colour']}
         return dumps(data)
     
-    @app.route("/set_username/<username>", methods=["GET"])
+    
     def set_username(username):
         session['username'] = username
         print("new username is", username)
-        return Response(status=200)
-    
-    # @app.route("/check_answer", methods=["POST"])
-    # def check_answer():
-    #     print("Checking an answer...")
-    #     answer = request.json
+        return f"Your username has been set to {username}."
 
-    #     for idx, q in enumerate(questions):
-    #         if eval(q) == int(answer):
-    #             solved.append(idx)
-
-    #     return Response({
-
-    @sock.route('/echo')
+    @sock.route('/send')
     def echo(ws):
         while True:            
-            data = ws.receive()
-            ws.send(data * 2)
+            data = loads(ws.receive())
             print(data)
+            mode = data["mode"]
+            msg  = data["message"]
+            if mode == 0:       # new username
+                response = set_username(msg)                
+            elif mode == 1:     # new game
+                response = create_new_game(msg)
+            elif mode == 2:     # join game
+                response = join_game(msg)
+            elif mode == 3:     # new answer
+                response = check_answer(msg)
+            ws.send(response)
+
 
     @app.route("/socket_test")
     def test_socket():

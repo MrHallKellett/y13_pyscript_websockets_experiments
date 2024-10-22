@@ -1,8 +1,8 @@
 Maths Quiz Game
 
-User connects to app.
+User connects to app. X
 User can set username. X
-User shown list of currently running games.
+User shown list of currently running games. X
 User given option to create game.
     Create game screen:
         set delay - how long before game starts?
