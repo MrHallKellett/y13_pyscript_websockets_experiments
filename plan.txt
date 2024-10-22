@@ -1,0 +1,62 @@
+Maths Quiz Game
+
+User connects to app.
+User can set username.
+User shown list of currently running games.
+User given option to create game.
+    Create game screen:
+        set delay - how long before game starts?
+        set game name
+        set max players
+        go -- instantiates new Game object
+
+User joins game
+    Game screen:
+        User assigned colour
+        Has game began? Yes
+            Server generates questions
+            Questions sent to clients
+            Users provide answers
+            Answer sent to server
+            Server checks answer
+            Results sent to clients
+        No:
+            countdown displayed on screen
+            user lists displayed on screen
+
+
+###########################################
+
+App
+
+current_games       : dict{game_id:Game}
+--------------
+create_new_game()
+check_answer(guess: int, player_id: int, game_id: int)
+
+
+Game
+
+questions           : List[Question]
+delay               : int # num of seconds before game begins
+name                : str
+max_players         : int
+players             : dict{player_id:Player}
+--------------
+jsonify             : convert Game object to json
+check_answer(guess: int, player_id: int)
+
+
+Question
+
+text                : str
+correct_answer      : int
+answered_by         : int  # id_ of first player to answer
+colour:             : str
+
+
+Player
+
+name                : str
+id_                 : int
+colour              : str
